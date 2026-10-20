@@ -1,0 +1,204 @@
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background: #11101f;
+  color: #f5f3ff;
+  font-family: Arial, sans-serif;
+}
+
+main {
+  max-width: 900px;
+  margin: auto;
+}
+
+header {
+  text-align: center;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 38px;
+  margin: 8px;
+}
+
+h1 span {
+  color: #b8a2ff;
+}
+
+p {
+  color: #c5c0e0;
+  line-height: 1.6;
+}
+
+.stats {
+  display: flex;
+  gap: 12px;
+  margin: 15px 0;
+}
+
+.stat {
+  flex: 1;
+  background: #211f39;
+  border: 1px solid #40395d;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.stat strong {
+  display: block;
+  font-size: 24px;
+  margin-top: 8px;
+}
+
+small {
+  color: #b8a2ff;
+}
+
+.panel {
+  background: #19172b;
+  border: 1px solid #40395d;
+  padding: 18px;
+  border-radius: 16px;
+}
+
+svg {
+  width: 100%;
+  background: #171528;
+  border-radius: 12px;
+}
+
+.edge {
+  stroke: #514d72;
+  stroke-width: 4;
+}
+
+.edge.path {
+  stroke: #b8a2ff;
+  stroke-width: 5;
+}
+
+.weight {
+  fill: white;
+  font-size: 14px;
+  text-anchor: middle;
+}
+
+.node {
+  cursor: pointer;
+}
+
+.node circle {
+  fill: #2b2847;
+  stroke: #8a80b8;
+  stroke-width: 3;
+}
+
+.node text {
+  fill: white;
+  text-anchor: middle;
+  font-size: 16px;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+.node.current circle {
+  stroke: #b8a2ff;
+  stroke-width: 5;
+}
+
+.node.next circle {
+  stroke: #78e5c1;
+  stroke-width: 5;
+}
+
+.node.goal circle {
+  fill: #512b46;
+  stroke: #ff91b8;
+}
+
+.node:focus-visible circle {
+  stroke: white;
+  stroke-width: 5;
+}
+
+button {
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 9px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px 5px 5px 0;
+}
+
+button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 3px;
+}
+
+.primary {
+  background: #b8a2ff;
+  color: #171528;
+}
+
+.secondary {
+  background: #302b4a;
+  color: white;
+}
+
+button:hover {
+  filter: brightness(1.15);
+}
+
+#msg {
+  background: #24213e;
+  border-radius: 9px;
+  padding: 14px;
+  min-height: 45px;
+}
+
+.learning {
+  margin-top: 14px;
+}
+
+footer {
+  text-align: center;
+  color: #8e89ac;
+  font-size: 12px;
+  padding: 20px;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+
+  .stats {
+    gap: 6px;
+  }
+
+  .stat {
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .stat strong {
+    font-size: 20px;
+  }
+
+  .panel {
+    padding: 10px;
+  }
+
+  button {
+    max-width: 100%;
+  }
+}

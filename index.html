@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rota do Grafo</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:#11101f;color:#f5f3ff;font-family:Arial,sans-serif}
+main{max-width:900px;margin:auto}
+header{text-align:center;padding:20px}
+h1{font-size:38px;margin:8px}
+h1 span{color:#b8a2ff}
+p{color:#c5c0e0;line-height:1.6}
+.stats{display:flex;gap:12px;margin:15px 0}
+.stat{flex:1;background:#211f39;border:1px solid #40395d;padding:16px;border-radius:12px}
+.stat strong{display:block;font-size:24px;margin-top:8px}
+small{color:#b8a2ff}
+.panel{background:#19172b;border:1px solid #40395d;padding:18px;border-radius:16px}
+svg{width:100%;background:#171528;border-radius:12px}
+.edge{stroke:#514d72;stroke-width:4}
+.edge.path{stroke:#b8a2ff;stroke-width:5}
+.weight{fill:#fff;font-size:14px;text-anchor:middle}
+.node{cursor:pointer}
+.node circle{fill:#2b2847;stroke:#8a80b8;stroke-width:3}
+.node text{fill:white;text-anchor:middle;font-size:16px;font-weight:bold;pointer-events:none}
+.node.current circle{stroke:#b8a2ff;stroke-width:5}
+.node.next circle{stroke:#78e5c1;stroke-width:5}
+.node.goal circle{fill:#512b46;stroke:#ff91b8}
+button{padding:12px 16px;border:0;border-radius:9px;font-weight:bold;cursor:pointer;margin:5px 5px 5px 0}
+.primary{background:#b8a2ff;color:#171528}
+.secondary{background:#302b4a;color:white}
+#msg{background:#24213e;border-radius:9px;padding:14px;min-height:45px}
+footer{text-align:center;color:#8e89ac;font-size:12px;padding:20px}
+@media(max-width:600px){body{padding:10px}h1{font-size:30px}.stats{gap:6px}.stat{padding:10px;font-size:12px}.stat strong{font-size:20px}.panel{padding:9px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<small>MISSÃO DE CONEXÃO</small>
+<h1>Rota do <span>Grafo</span></h1>
+<p>Encontre o caminho de menor custo entre os vértices.</p>
+</header>
+
+<section class="stats">
+<div class="stat">CUSTO DA ROTA<strong id="cost">0</strong></div>
+<div class="stat">ORÇAMENTO<strong>12</strong></div>
+<div class="stat">MOVIMENTOS<strong id="moves">0</strong></div>
+</section>
+
+<section class="panel">
+<h3>Mapa de conexões</h3>
+<p>Clique em um vértice vizinho ao atual para avançar.</p>
+<svg id="map" viewBox="0 0 700 360" role="img" aria-label="Grafo interativo"></svg>
+<p id="msg" role="status">Saia do vértice A e chegue ao vértice G gastando o mínimo possível.</p>
+<button class="secondary" id="hint">Revelar menor caminho</button>
+<button class="primary" id="reset">Reiniciar missão ↻</button>
+</section>
+
+<section class="panel" style="margin-top:14px">
+<h3>Aprenda enquanto joga</h3>
+<p><b>Vértices:</b> são os círculos do grafo.</p>
+<p><b>Arestas:</b> são as linhas que conectam os vértices.</p>
+<p><b>Pesos:</b> os números nas linhas representam o custo de cada conexão.</p>
+<p><b>Dijkstra:</b> algoritmo utilizado para encontrar o caminho de menor custo em grafos com pesos não negativos.</p>
+</section>
+<footer>JOGO EDUCATIVO DE TEORIA DOS GRAFOS</footer>
+</main>
+
+<script>
+const points={
+ A:[55,180],B:[180,65],C:[180,295],
+ D:[350,180],E:[520,65],F:[520,295],G:[645,180]
+};
+const edges=[
+ ["A","B",2],["A","C",4],["B","C",1],
+ ["B","D",4],["C","D",2],["B","E",7],
+ ["D","E",2],["D","F",3],["E","F",1],
+ ["E","G",5],["F","G",2]
+];
+const start="A",goal="G",budget=12;
+let current,path,cost,moves,finished,showHint;
+
+function neighbors(v){
+ return edges.filter(e=>e[0]===v||e[1]===v)
+ .map(e=>e[0]===v?e[1]:e[0]);
+}
+function edgeBetween(a,b){
+ return edges.find(e=>(e[0]===a&&e[1]===b)||(e[1]===a&&e[0]===b));
+}
+function dijkstra(){
+ const dist={},prev={},unvisited=new Set(Object.keys(points));
+ Object.keys(points).forEach(v=>dist[v]=Infinity);
+ dist[start]=0;
+ while(unvisited.size){
+  let u=null;
+  for(const v of unvisited)
+   if(u===null||dist[v]<dist[u])u=v;
+  if(u===null||dist[u]===Infinity)break;
+  unvisited.delete(u);
+  if(u===goal)break;
+  for(const v of neighbors(u)){
+   if(!unvisited.has(v))continue;
+   const candidate=dist[u]+edgeBetween(u,v)[2];
+   if(candidate<dist[v]){dist[v]=candidate;prev[v]=u;}
+  }
+ }
+ const route=[];
+ let v=goal;
+ while(v!==undefined){route.unshift(v);if(v===start)break;v=prev[v];}
+ return {route,cost:dist[goal]};
+}
+const solution=dijkstra();
+
+function svgEl(tag,attrs={},text=""){
+ const el=document.createElementNS("http://www.w3.org/2000/svg",tag);
+ Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));
+ el.textContent=text;
+ return el;
+}
+function tell(text,success=false){
+ const msg=document.getElementById("msg");
+ msg.textContent=text;
+ msg.style.color=success?"#78e5c1":"#f5f3ff";
+}
+function draw(){
+ const map=document.getElementById("map");
+ map.replaceChildren();
+
+ edges.forEach(([a,b,w])=>{
+  const [x1,y1]=points[a],[x2,y2]=points[b];
+  const line=svgEl("line",{x1,y1,x2,y2,class:"edge"});
+  for(let i=1;i<path.length;i++){
+   if((path[i-1]===a&&path[i]===b)||(path[i-1]===b&&path[i]===a))
+    line.classList.add("path");
+  }
+  if(showHint){
+   for(let i=1;i<solution.route.length;i++){
+    if((solution.route[i-1]===a&&solution.route[i]===b)||
+       (solution.route[i-1]===b&&solution.route[i]===a))
+     line.classList.add("path");
+   }
+  }
+  map.appendChild(line);
+  const mx=(x1+x2)/2,my=(y1+y2)/2;
+  map.appendChild(svgEl("rect",{x:mx-12,y:my-11,width:24,height:20,rx:5,fill:"#302b4a"}));
+  map.appendChild(svgEl("text",{x:mx,y:my+5,class:"weight"},String(w)));
+ });
+
+ Object.entries(points).forEach(([id,[x,y]])=>{
+  const g=svgEl("g",{class:"node"+(id===current?" current":"")+
+   (id===goal?" goal":"")+
+   (!finished&&neighbors(current).includes(id)?" next":""),
+   tabindex:"0",role:"button","aria-label":"Vértice "+id});
+  g.appendChild(svgEl("circle",{cx:x,cy:y,r:23}));
+  g.appendChild(svgEl("text",{x,y:y+5},id));
+  g.addEventListener("click",()=>move(id));
+  g.addEventListener("keydown",e=>{
+   if(e.key==="Enter"||e.key===" "){e.preventDefault();move(id);}
+  });
+  map.appendChild(g);
+ });
+ document.getElementById("cost").textContent=cost;
+ document.getElementById("moves").textContent=moves;
+}
+function move(v){
+ if(finished)return;
+ if(v===current)return;
+ const edge=edgeBetween(current,v);
+ if(!edge){
+  tell("Escolha um vértice vizinho conectado por uma aresta.");
+  return;
+ }
+ cost+=edge[2];moves++;current=v;path.push(v);showHint=false;
+ if(cost>budget){
+  finished=true;
+  tell("Orçamento ultrapassado! Reinicie e tente uma rota mais econômica.");
+ }else if(current===goal){
+  finished=true;
+  tell(cost===solution.cost?
+   "Parabéns! Você encontrou o menor caminho, com custo "+cost+"!":
+   "Destino alcançado! Seu custo foi "+cost+". O menor custo possível é "+solution.cost+".",
+   cost===solution.cost);
+ }else{
+  tell("Você chegou ao vértice "+v+". Continue até G.");
+ }
+ draw();
+}
+function reset(){
+ current=start;path=[start];cost=0;moves=0;
+ finished=false;showHint=false;
+ tell("Saia do vértice A e chegue ao vértice G gastando o mínimo possível.");
+ draw();
+}
+document.getElementById("reset").addEventListener("click",reset);
+document.getElementById("hint").addEventListener("click",()=>{
+ showHint=!showHint;
+ tell(showHint?
+  "Menor caminho: "+solution.route.join(" → ")+". Custo mínimo: "+solution.cost+"."
+  :"Dica ocultada. Tente encontrar a melhor rota.");
+ draw();
+});
+reset();
+</script>
+</body>
+</html>
